@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediRoute - 진료과 찾기 앱</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      color: #222;
+    }
+
+    .app {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: white;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2563eb;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: #f8fafc;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    select, button {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      margin-top: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .result {
+      display: none;
+      background: #eef6ff;
+      border-left: 6px solid #2563eb;
+      padding: 18px;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+
+    .danger {
+      background: #fff1f2;
+      border-left: 6px solid #dc2626;
+      padding: 14px;
+      border-radius: 12px;
+      margin-top: 14px;
+      color: #7f1d1d;
+    }
+
+    .small {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .tag {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1e40af;
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>MediRoute</h1>
+    <p class="subtitle">증상에 따라 적절한 진료과를 안내하는 모바일 웹앱</p>
+
+    <div class="card">
+      <h3>현재 가장 불편한 증상을 선택하세요</h3>
+      <select id="symptom">
+        <option value="">증상 선택</option>
+        <option value="headache">두통</option>
+        <option value="stomach">복통</option>
+        <option value="backpain">허리 통증</option>
+        <option value="skin">피부 발진</option>
+        <option value="chest">가슴 통증</option>
+        <option value="fever">발열</option>
+        <option value="dizziness">어지럼증</option>
+        <option value="joint">관절 통증</option>
+      </select>
+      <button onclick="showResult()">진료과 추천받기</button>
+    </div>
+
+    <div id="result" class="result">
+      <h3 id="department"></h3>
+      <p id="explanation"></p>
+      <span id="tag" class="tag"></span>
+
+      <div id="dangerBox" class="danger"></div>
+    </div>
+
+    <div class="card small">
+      ⚠️ 이 앱은 교육 목적의 진료과 안내 도구입니다.  
+      실제 진단이나 치료를 대신하지 않으며, 증상이 심하거나 응급상황이 의심되면 즉시 119 또는 의료기관에 문의하세요.
+    </div>
+  </div>
+
+  <script>
+    const data = {
+      headache: {
+        department: "추천 진료과: 신경과 / 가정의학과",
+        explanation: "두통은 긴장성 두통, 편두통, 감염, 혈압 문제 등 다양한 원인으로 발생할 수 있습니다.",
+        tag: "두통 평가",
+        danger: "갑자기 매우 심한 두통, 마비, 말이 어눌함, 의식저하가 있으면 즉시 응급실 방문이 필요합니다."
+      },
+      stomach: {
+        department: "추천 진료과: 소화기내과 / 외과",
+        explanation: "복통은 위장관 문제, 장염, 충수염, 담낭 질환 등과 관련될 수 있습니다.",
+        tag: "복부 증상",
+        danger: "오른쪽 아랫배 통증, 고열, 반복 구토, 심한 복부 팽만이 있으면 빠른 진료가 필요합니다."
+      },
+      backpain: {
+        department: "추천 진료과: 재활의학과 / 정형외과",
+        explanation: "허리 통증은 근육 긴장, 디스크, 자세 문제, 신경 압박 등과 관련될 수 있습니다.",
+        tag: "근골격계",
+        danger: "다리 마비, 대소변 조절 이상, 심한 저림이 있으면 즉시 진료가 필요합니다."
+      },
+      skin: {
+        department: "추천 진료과: 피부과",
+        explanation: "피부 발진은 알레르기, 감염, 피부염 등 다양한 원인으로 나타날 수 있습니다.",
+        tag: "피부 증상",
+        danger: "호흡곤란, 입술·눈 주변 부종, 전신 두드러기가 동반되면 응급상황일 수 있습니다."
+      },
+      chest: {
+        department: "추천 진료과: 응급의학과 / 심장내과",
+        explanation: "가슴 통증은 심장, 폐, 근육, 위식도 문제 등과 관련될 수 있습니다.",
+        tag: "응급 가능성",
+        danger: "가슴을 조이는 통증, 식은땀, 호흡곤란, 왼쪽 팔 통증이 있으면 즉시 119에 연락하세요."
+      },
+      fever: {
+        department: "추천 진료과: 감염내과 / 가정의학과",
+        explanation: "발열은 감염, 염증 반응 등으로 발생할 수 있습니다.",
+        tag: "감염 의심",
+        danger: "고열이 지속되거나 의식저하, 호흡곤란, 심한 탈수가 있으면 빠른 진료가 필요합니다."
+      },
+      dizziness: {
+        department: "추천 진료과: 이비인후과 / 신경과",
+        explanation: "어지럼증은 귀의 평형기관 문제, 혈압 변화, 신경계 문제 등과 관련될 수 있습니다.",
+        tag: "어지럼 평가",
+        danger: "한쪽 마비, 말 어눌함, 심한 두통, 의식저하가 함께 있으면 응급실 방문이 필요합니다."
+      },
+      joint: {
+        department: "추천 진료과: 재활의학과 / 류마티스내과 / 정형외과",
+        explanation: "관절 통증은 염좌, 관절염, 염증성 질환, 과사용 손상 등과 관련될 수 있습니다.",
+        tag: "관절 건강",
+        danger: "관절이 심하게 붓고 뜨겁거나, 고열이 동반되면 빠른 진료가 필요합니다."
+      }
+    };
+
+    function showResult() {
+      const symptom = document.getElementById("symptom").value;
+      const result = document.getElementById("result");
+
+      if (!symptom) {
+        alert("증상을 선택해주세요!");
+        return;
+      }
+
+      document.getElementById("department").innerText = data[symptom].department;
+      document.getElementById("explanation").innerText = data[symptom].explanation;
+      document.getElementById("tag").innerText = data[symptom].tag;
+      document.getElementById("dangerBox").innerText = "응급 신호: " + data[symptom].danger;
+
+      result.style.display = "block";
+    }
+  </script>
+</body>
+</html>
