@@ -3,204 +3,295 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MediRoute - 진료과 찾기 앱</title>
+  <title>MediRoute AI - 진료과 추천 앱</title>
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #f4f7fb;
-      color: #222;
+      background: #eef3f8;
+      color: #1f2937;
     }
-
     .app {
       max-width: 430px;
       margin: 0 auto;
       min-height: 100vh;
-      background: white;
-      padding: 24px;
+      background: #ffffff;
+      padding: 22px;
       box-sizing: border-box;
     }
-
     h1 {
       text-align: center;
       color: #2563eb;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
-
     .subtitle {
       text-align: center;
-      color: #666;
+      color: #6b7280;
       font-size: 14px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
+      line-height: 1.5;
     }
-
     .card {
       background: #f8fafc;
-      border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 15px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.06);
     }
-
-    select, button {
+    label {
+      display: block;
+      margin: 8px 0;
+      font-size: 15px;
+    }
+    select, input[type="range"], button {
       width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      border-radius: 12px;
-      border: 1px solid #ccc;
       box-sizing: border-box;
     }
-
+    select {
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      font-size: 15px;
+      margin-top: 6px;
+    }
     button {
+      margin-top: 12px;
+      padding: 15px;
+      border: none;
+      border-radius: 14px;
       background: #2563eb;
       color: white;
-      border: none;
-      margin-top: 12px;
+      font-size: 17px;
       font-weight: bold;
       cursor: pointer;
     }
-
     button:hover {
       background: #1d4ed8;
     }
-
     .result {
       display: none;
-      background: #eef6ff;
-      border-left: 6px solid #2563eb;
+      border-radius: 18px;
       padding: 18px;
-      border-radius: 12px;
-      margin-top: 20px;
+      background: #eff6ff;
+      border-left: 7px solid #2563eb;
+      margin-top: 18px;
     }
-
     .danger {
+      display: none;
+      margin-top: 12px;
       background: #fff1f2;
-      border-left: 6px solid #dc2626;
-      padding: 14px;
-      border-radius: 12px;
-      margin-top: 14px;
+      border-left: 7px solid #dc2626;
       color: #7f1d1d;
+      padding: 14px;
+      border-radius: 14px;
+      font-weight: bold;
     }
-
-    .small {
-      font-size: 13px;
-      color: #666;
-      line-height: 1.5;
-    }
-
     .tag {
       display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
       background: #dbeafe;
       color: #1e40af;
-      padding: 6px 10px;
-      border-radius: 20px;
       font-size: 13px;
-      margin-top: 6px;
+      margin: 4px 4px 4px 0;
+    }
+    .scoreBox {
+      background: white;
+      padding: 12px;
+      border-radius: 14px;
+      margin-top: 10px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .small {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.6;
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <h1>MediRoute</h1>
-    <p class="subtitle">증상에 따라 적절한 진료과를 안내하는 모바일 웹앱</p>
+    <h1>MediRoute AI</h1>
+    <p class="subtitle">
+      여러 증상을 종합하여 적절한 진료과와 응급 신호를 안내하는 모바일 의료 교육 앱
+    </p>
 
     <div class="card">
-      <h3>현재 가장 불편한 증상을 선택하세요</h3>
-      <select id="symptom">
-        <option value="">증상 선택</option>
-        <option value="headache">두통</option>
-        <option value="stomach">복통</option>
-        <option value="backpain">허리 통증</option>
-        <option value="skin">피부 발진</option>
-        <option value="chest">가슴 통증</option>
-        <option value="fever">발열</option>
-        <option value="dizziness">어지럼증</option>
-        <option value="joint">관절 통증</option>
+      <h3>1. 가장 불편한 부위</h3>
+      <select id="bodyPart">
+        <option value="">선택하세요</option>
+        <option value="head">머리 / 어지럼</option>
+        <option value="chest">가슴 / 호흡</option>
+        <option value="abdomen">배 / 소화기</option>
+        <option value="back">허리 / 목</option>
+        <option value="joint">관절 / 근육</option>
+        <option value="skin">피부</option>
+        <option value="urine">소변 / 배뇨</option>
       </select>
-      <button onclick="showResult()">진료과 추천받기</button>
     </div>
 
-    <div id="result" class="result">
-      <h3 id="department"></h3>
-      <p id="explanation"></p>
-      <span id="tag" class="tag"></span>
+    <div class="card">
+      <h3>2. 동반 증상 체크</h3>
+      <label><input type="checkbox" value="fever"> 발열</label>
+      <label><input type="checkbox" value="pain"> 통증</label>
+      <label><input type="checkbox" value="vomit"> 구토 / 메스꺼움</label>
+      <label><input type="checkbox" value="dizzy"> 어지럼</label>
+      <label><input type="checkbox" value="rash"> 발진 / 가려움</label>
+      <label><input type="checkbox" value="numb"> 저림 / 마비감</label>
+      <label><input type="checkbox" value="breath"> 숨참</label>
+      <label><input type="checkbox" value="swelling"> 붓기</label>
+    </div>
 
-      <div id="dangerBox" class="danger"></div>
+    <div class="card">
+      <h3>3. 증상 기간</h3>
+      <select id="duration">
+        <option value="short">오늘 갑자기 시작</option>
+        <option value="days">2~7일 지속</option>
+        <option value="weeks">1주 이상 지속</option>
+        <option value="chronic">한 달 이상 반복</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <h3>4. 통증/불편감 정도: <span id="painValue">5</span>점</h3>
+      <input type="range" id="painScore" min="0" max="10" value="5" oninput="updatePain()" />
+    </div>
+
+    <div class="card">
+      <h3>5. 응급 신호가 있나요?</h3>
+      <label><input type="checkbox" class="redflag" value="chestPain"> 심한 가슴 통증</label>
+      <label><input type="checkbox" class="redflag" value="weakness"> 한쪽 팔다리 마비 / 말 어눌함</label>
+      <label><input type="checkbox" class="redflag" value="breathHard"> 심한 호흡곤란</label>
+      <label><input type="checkbox" class="redflag" value="conscious"> 의식저하</label>
+      <label><input type="checkbox" class="redflag" value="severePain"> 참기 어려운 극심한 통증</label>
+    </div>
+
+    <button onclick="analyze()">진료과 추천받기</button>
+
+    <div id="dangerBox" class="danger"></div>
+
+    <div id="result" class="result">
+      <h3 id="mainDept"></h3>
+      <p id="reason"></p>
+      <div id="tags"></div>
+      <div class="scoreBox" id="scoreDetail"></div>
     </div>
 
     <div class="card small">
-      ⚠️ 이 앱은 교육 목적의 진료과 안내 도구입니다.  
-      실제 진단이나 치료를 대신하지 않으며, 증상이 심하거나 응급상황이 의심되면 즉시 119 또는 의료기관에 문의하세요.
+      ⚠️ 이 앱은 교육 목적의 진료과 안내 앱입니다. 실제 진단이나 치료를 대신하지 않습니다.
+      응급 신호가 있거나 증상이 심하면 즉시 119 또는 의료기관에 문의하세요.
     </div>
   </div>
 
   <script>
-    const data = {
-      headache: {
-        department: "추천 진료과: 신경과 / 가정의학과",
-        explanation: "두통은 긴장성 두통, 편두통, 감염, 혈압 문제 등 다양한 원인으로 발생할 수 있습니다.",
-        tag: "두통 평가",
-        danger: "갑자기 매우 심한 두통, 마비, 말이 어눌함, 의식저하가 있으면 즉시 응급실 방문이 필요합니다."
-      },
-      stomach: {
-        department: "추천 진료과: 소화기내과 / 외과",
-        explanation: "복통은 위장관 문제, 장염, 충수염, 담낭 질환 등과 관련될 수 있습니다.",
-        tag: "복부 증상",
-        danger: "오른쪽 아랫배 통증, 고열, 반복 구토, 심한 복부 팽만이 있으면 빠른 진료가 필요합니다."
-      },
-      backpain: {
-        department: "추천 진료과: 재활의학과 / 정형외과",
-        explanation: "허리 통증은 근육 긴장, 디스크, 자세 문제, 신경 압박 등과 관련될 수 있습니다.",
-        tag: "근골격계",
-        danger: "다리 마비, 대소변 조절 이상, 심한 저림이 있으면 즉시 진료가 필요합니다."
-      },
-      skin: {
-        department: "추천 진료과: 피부과",
-        explanation: "피부 발진은 알레르기, 감염, 피부염 등 다양한 원인으로 나타날 수 있습니다.",
-        tag: "피부 증상",
-        danger: "호흡곤란, 입술·눈 주변 부종, 전신 두드러기가 동반되면 응급상황일 수 있습니다."
-      },
-      chest: {
-        department: "추천 진료과: 응급의학과 / 심장내과",
-        explanation: "가슴 통증은 심장, 폐, 근육, 위식도 문제 등과 관련될 수 있습니다.",
-        tag: "응급 가능성",
-        danger: "가슴을 조이는 통증, 식은땀, 호흡곤란, 왼쪽 팔 통증이 있으면 즉시 119에 연락하세요."
-      },
-      fever: {
-        department: "추천 진료과: 감염내과 / 가정의학과",
-        explanation: "발열은 감염, 염증 반응 등으로 발생할 수 있습니다.",
-        tag: "감염 의심",
-        danger: "고열이 지속되거나 의식저하, 호흡곤란, 심한 탈수가 있으면 빠른 진료가 필요합니다."
-      },
-      dizziness: {
-        department: "추천 진료과: 이비인후과 / 신경과",
-        explanation: "어지럼증은 귀의 평형기관 문제, 혈압 변화, 신경계 문제 등과 관련될 수 있습니다.",
-        tag: "어지럼 평가",
-        danger: "한쪽 마비, 말 어눌함, 심한 두통, 의식저하가 함께 있으면 응급실 방문이 필요합니다."
-      },
-      joint: {
-        department: "추천 진료과: 재활의학과 / 류마티스내과 / 정형외과",
-        explanation: "관절 통증은 염좌, 관절염, 염증성 질환, 과사용 손상 등과 관련될 수 있습니다.",
-        tag: "관절 건강",
-        danger: "관절이 심하게 붓고 뜨겁거나, 고열이 동반되면 빠른 진료가 필요합니다."
-      }
-    };
+    function updatePain() {
+      document.getElementById("painValue").innerText = document.getElementById("painScore").value;
+    }
 
-    function showResult() {
-      const symptom = document.getElementById("symptom").value;
-      const result = document.getElementById("result");
+    function analyze() {
+      const bodyPart = document.getElementById("bodyPart").value;
+      const duration = document.getElementById("duration").value;
+      const painScore = Number(document.getElementById("painScore").value);
 
-      if (!symptom) {
-        alert("증상을 선택해주세요!");
+      if (!bodyPart) {
+        alert("가장 불편한 부위를 선택해주세요!");
         return;
       }
 
-      document.getElementById("department").innerText = data[symptom].department;
-      document.getElementById("explanation").innerText = data[symptom].explanation;
-      document.getElementById("tag").innerText = data[symptom].tag;
-      document.getElementById("dangerBox").innerText = "응급 신호: " + data[symptom].danger;
+      const symptoms = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(cb => cb.value);
+
+      const redflags = Array.from(document.querySelectorAll('.redflag:checked'))
+        .map(cb => cb.value);
+
+      let scores = {
+        "신경과": 0,
+        "심장내과 / 응급의학과": 0,
+        "소화기내과": 0,
+        "재활의학과 / 정형외과": 0,
+        "피부과": 0,
+        "감염내과 / 가정의학과": 0,
+        "비뇨의학과": 0,
+        "이비인후과": 0
+      };
+
+      if (bodyPart === "head") scores["신경과"] += 4;
+      if (bodyPart === "chest") scores["심장내과 / 응급의학과"] += 4;
+      if (bodyPart === "abdomen") scores["소화기내과"] += 4;
+      if (bodyPart === "back") scores["재활의학과 / 정형외과"] += 4;
+      if (bodyPart === "joint") scores["재활의학과 / 정형외과"] += 4;
+      if (bodyPart === "skin") scores["피부과"] += 4;
+      if (bodyPart === "urine") scores["비뇨의학과"] += 4;
+
+      if (symptoms.includes("fever")) scores["감염내과 / 가정의학과"] += 3;
+      if (symptoms.includes("pain")) scores["재활의학과 / 정형외과"] += 1;
+      if (symptoms.includes("vomit")) scores["소화기내과"] += 2;
+      if (symptoms.includes("dizzy")) {
+        scores["신경과"] += 2;
+        scores["이비인후과"] += 2;
+      }
+      if (symptoms.includes("rash")) scores["피부과"] += 3;
+      if (symptoms.includes("numb")) scores["신경과"] += 3;
+      if (symptoms.includes("breath")) scores["심장내과 / 응급의학과"] += 3;
+      if (symptoms.includes("swelling")) scores["재활의학과 / 정형외과"] += 2;
+
+      if (duration === "short") scores["감염내과 / 가정의학과"] += 1;
+      if (duration === "weeks" || duration === "chronic") scores["재활의학과 / 정형외과"] += 1;
+
+      if (painScore >= 7) {
+        scores["응급의학과"] = 4;
+      }
+
+      let sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+      let best = sorted[0];
+      let second = sorted[1];
+
+      const result = document.getElementById("result");
+      const dangerBox = document.getElementById("dangerBox");
+
+      if (redflags.length > 0) {
+        dangerBox.style.display = "block";
+        dangerBox.innerText = "응급 신호가 체크되었습니다. 진료과 선택보다 즉시 119 또는 응급실 상담이 우선입니다.";
+      } else {
+        dangerBox.style.display = "none";
+      }
+
+      document.getElementById("mainDept").innerText = "추천 진료과: " + best[0];
+
+      let reasonText = "";
+      reasonText += "선택한 주요 부위, 동반 증상, 증상 기간, 통증 점수를 종합하여 추천했습니다. ";
+      reasonText += "가장 높은 점수를 받은 진료과는 " + best[0] + "이며, ";
+      reasonText += "다음으로 고려할 수 있는 진료과는 " + second[0] + "입니다.";
+
+      document.getElementById("reason").innerText = reasonText;
+
+      const tagArea = document.getElementById("tags");
+      tagArea.innerHTML = "";
+      const tagList = [
+        "부위 기반 분석",
+        "동반 증상 반영",
+        "응급 신호 확인",
+        "진료 전 의사소통 보조"
+      ];
+      tagList.forEach(t => {
+        const span = document.createElement("span");
+        span.className = "tag";
+        span.innerText = t;
+        tagArea.appendChild(span);
+      });
+
+      document.getElementById("scoreDetail").innerHTML = `
+        <b>분석 결과 요약</b><br>
+        1순위: ${best[0]} (${best[1]}점)<br>
+        2순위: ${second[0]} (${second[1]}점)<br>
+        통증 점수: ${painScore}/10점<br>
+        선택한 동반 증상 수: ${symptoms.length}개<br>
+        응급 신호 체크 수: ${redflags.length}개
+      `;
 
       result.style.display = "block";
+      result.scrollIntoView({ behavior: "smooth" });
     }
   </script>
 </body>
